@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropFlow | Cyber Futures Intelligence</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg: #020617;
+            --card: rgba(15, 23, 42, 0.6);
+            --card-border: rgba(56, 189, 248, 0.1);
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.05);
+            --emerald: #2dd4bf;
+            --rose: #f43f5e;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --indigo: #818cf8;
+            --purple: #c084fc;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.05) 0%, transparent 50%);
+            color: var(--text); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            padding: 24px; 
+            line-height: 1.6; 
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .app-shell { max-width: 1440px; margin: 0 auto; }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 32px; 
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            border: 1px solid var(--card-border);
+        }
+        
+        .branding { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-mark { 
+            width: 14px; 
+            height: 14px; 
+            background: var(--accent); 
+            border-radius: 4px; 
+            box-shadow: 0 0 20px var(--accent); 
+        }
+        
+        .ticker-bar { 
+            display: flex; 
+            gap: 6px; 
+            background: rgba(0,0,0,0.2); 
+            padding: 4px; 
+            border-radius: 12px; 
+        }
+        
+        .ticker-bar button { 
+            background: transparent; 
+            border: none; 
+            color: var(--text-dim); 
+            padding: 10px 20px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        .ticker-bar button.active { 
+            background: var(--accent); 
+            color: #000; 
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .workspace { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+            gap: 24px; 
+            margin-bottom: 24px; 
+        }
+
+        .card { 
+            background: var(--card); 
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border); 
+            border-radius: var(--radius); 
+            padding: 24px; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 400px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .card-header h2 { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            color: var(--accent); 
+            font-weight: 800; 
+        }
+        
+        .card-header i { color: var(--text-dim); width: 18px; height: 18px; }
+
+        .field { margin-bottom: 16px; }
+        .field label { 
+            display: block; 
+            font-size: 0.65rem; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        input, select { 
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.2); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 10px; 
+            padding: 12px 16px; 
+            color: white; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            outline: none; 
+            transition: all 0.2s;
+        }
+        
+        input:focus, select:focus { 
+            border-color: var(--accent); 
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+
+        .display-panel { 
+            margin-top: auto; 
+            padding: 20px; 
+            border-radius: 12px; 
+            background: rgba(56, 189, 248, 0.03); 
+            text-align: center;
+            border: 1px solid rgba(56, 189, 248, 0.05);
+        }
+        
+        .display-panel.accent { 
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, transparent 100%);
+            border: 1px solid rgba(56, 189, 248, 0.1); 
+        }
+        
+        .val-hero { 
+            font-size: 2.4rem; 
+            font-weight: 800; 
+            display: block; 
+            margin: 4px 0; 
+            letter-spacing: -1px;
+        }
+        
+        .val-sub { 
+            font-size: 0.75rem; 
+            color: var(--text-dim); 
+            display: block; 
+            font-weight: 600;
+        }
+
+        .meter-container { margin-top: 16px; }
+        .meter-label { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.7rem; 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            text-transform: uppercase;
+        }
+        
+        .meter-track { 
+            height: 10px; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 5px; 
+            overflow: hidden; 
+            position: relative; 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        .meter-fill { 
+            height: 100%; 
+            width: 0%; 
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .btn-ai { 
+            background: rgba(129, 140, 248, 0.1); 
+            color: var(--indigo); 
+            border: 1px solid rgba(129, 140, 248, 0.2); 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            font-size: 0.7rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.2s; 
+        }
+        
+        .btn-ai:hover { 
+            background: var(--indigo); 
+            color: white; 
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.4);
+        }
+        
+        .btn-execute { 
+            width: 100%; 
+            background: var(--accent); 
+            color: #020617; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-weight: 800; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-top: 16px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        
+        .btn-execute:hover { 
+            background: #7dd3fc; 
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.3);
+        }
+
+        .journal { 
+            background: var(--card); 
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border); 
+            border-radius: var(--radius); 
+            padding: 24px; 
+        }
+        
+        .table-wrap { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; min-width: 800px; }
+        th { 
+            text-align: left; 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            color: var(--text-dim); 
+            padding: 12px 16px; 
+            letter-spacing: 1px;
+        }
+        td { 
+            padding: 16px; 
+            font-size: 0.85rem; 
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        td:first-child { border-left: 1px solid rgba(255,255,255,0.03); border-radius: 10px 0 0 10px; }
+        td:last-child { border-right: 1px solid rgba(255,255,255,0.03); border-radius: 0 10px 10px 0; }
+
+        .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; }
+        .badge-mini { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+        .badge-micro { background: rgba(192, 132, 252, 0.1); color: var(--purple); }
+
+        #aiOverlay { display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(12px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .ai-modal { 
+            background: #0f172a; 
+            border: 1px solid var(--indigo); 
+            width: 100%; 
+            max-width: 600px; 
+            border-radius: 24px; 
+            padding: 32px; 
+            position: relative; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(129, 140, 248, 0.2); 
+        }
+        .ai-close { position: absolute; top: 24px; right: 24px; cursor: pointer; color: var(--text-dim); transition: color 0.2s; }
+        .ai-close:hover { color: var(--rose); }
+        .ai-content { font-size: 1rem; line-height: 1.8; color: #e2e8f0; white-space: pre-line; max-height: 450px; overflow-y: auto; padding-right: 12px; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header>
+            <div class="branding"><div class="logo-mark"></div> PROPFLOW ELITE AI</div>
+            <div class="ticker-bar">
+                <button id="NQ" class="active" onclick="setTicker('NQ')">NASDAQ</button>
+                <button id="ES" onclick="setTicker('ES')">S&P 500</button>
+                <button id="GC" onclick="setTicker('GC')">GOLD</button>
+                <button id="CL" onclick="setTicker('CL')">CRUDE</button>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <!-- 1. RISK ARCHITECT -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Risk Architect</h2>
+                    <i data-lucide="shield"></i>
+                </div>
+                <div class="field">
+                    <label>Account Equity</label>
+                    <input type="number" id="balance" value="50000" oninput="runMath()">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="field"><label>Risk %</label><input type="number" id="riskP" value="1" step="0.1" oninput="runMath()"></div>
+                    <div class="field"><label>Stop Points</label><input type="number" id="slPts" value="20" oninput="runMath()"></div>
+                </div>
+                <div class="display-panel accent">
+                    <span class="val-sub">Allowed Exposure: $<span id="riskAmt">500</span></span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 12px;">
+                        <div><span class="val-hero mono" style="font-size: 1.8rem;" id="resMini">0</span><span class="val-sub">Minis</span></div>
+                        <div><span class="val-hero mono" style="font-size: 1.8rem;" id="resMicro">0</span><span class="val-sub">Micros</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. QUICK CONSISTENCY CALCULATOR -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Quick Consistency Check</h2>
+                    <i data-lucide="zap"></i>
+                </div>
+                <div class="field">
+                    <label>Account Size</label>
+                    <select id="quickSize" onchange="runMath()">
+                        <option value="25000">$25,000</option>
+                        <option value="50000" selected>$50,000</option>
+                        <option value="100000">$100,000</option>
+                        <option value="150000">$150,000</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="field">
+                        <label>Target Option</label>
+                        <select id="quickTargetPerc" onchange="runMath()">
+                            <option value="5">5% Target</option>
+                            <option value="6">6% Target</option>
+                            <option value="10" selected>10% Target</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Consistency Rule</label>
+                        <select id="quickRule" onchange="runMath()">
+                            <option value="30">30% Rule</option>
+                            <option value="40" selected>40% Rule</option>
+                            <option value="50">50% Rule</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="display-panel accent" style="background: rgba(192, 132, 252, 0.05); border-color: rgba(192, 132, 252, 0.1);">
+                    <span class="val-sub">Calculated Max Day Cap</span>
+                    <span class="val-hero mono" style="font-size: 2.2rem; color: var(--purple);">$<span id="quickCap">2,000</span></span>
+                    <span class="val-sub">Cap per Single Trade/Day</span>
+                </div>
+            </section>
+
+            <!-- 3. PAYOUT PLANNER -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Custom Strategy</h2>
+                    <button class="btn-ai" onclick="askAI('planner')">✨ AI Plan</button>
+                </div>
+                <div class="field">
+                    <label>Target Return %</label>
+                    <input type="number" id="goalP" value="10" oninput="runMath()">
+                </div>
+                <div class="field">
+                    <label>Consistency Threshold</label>
+                    <select id="consRule" onchange="runMath()">
+                        <option value="15">15% Rule</option>
+                        <option value="20">20% Rule</option>
+                        <option value="30">30% Rule</option>
+                        <option value="35">35% Rule</option>
+                        <option value="40" selected>40% Rule</option>
+                        <option value="50">50% Rule</option>
+                        <option value="60">60% Rule</option>
+                    </select>
+                </div>
+                <div class="display-panel">
+                    <span class="val-sub">Goal Amount: $<span id="goalAmt">5,000</span></span>
+                    <span class="val-hero mono" style="font-size: 1.8rem; color: var(--accent);">$<span id="maxProfitDay">2,000</span></span>
+                    <span class="val-sub">Max Profit Day</span>
+                </div>
+            </section>
+
+            <!-- 4. ACCOUNT HEALTH -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Account Health</h2>
+                    <button class="btn-ai" onclick="askAI('coach')">✨ Mindset</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="field"><label>Current Profit</label><input type="number" id="totalP" value="0" oninput="runMath()"></div>
+                    <div class="field"><label>Best Day P/L</label><input type="number" id="maxDay" value="0" oninput="runMath()"></div>
+                </div>
+                
+                <div class="meter-container">
+                    <div class="meter-label">
+                        <span>Consistency weight</span>
+                        <div style="display: flex; gap: 8px;">
+                            <span id="auditStatus" style="font-size: 0.65rem;">CLEAN</span>
+                            <span id="weightText" class="mono">0%</span>
+                        </div>
+                    </div>
+                    <div class="meter-track"><div id="pBar" class="meter-fill"></div></div>
+                    <p id="auditMsg" style="font-size: 0.65rem; color: var(--text-dim); margin-top: 8px; min-height: 3em;"></p>
+                </div>
+
+                <div class="meter-container" style="margin-top: 10px;">
+                    <div class="meter-label"><span>Session Drawdown</span><span id="ddPercent" class="mono">0%</span></div>
+                    <div class="meter-track"><div id="ddBar" class="meter-fill" style="background: var(--rose); box-shadow: 0 0 15px var(--rose);"></div></div>
+                </div>
+
+                <div class="display-panel" style="margin-top: 15px;">
+                    <span class="val-sub">Breach Cushion</span>
+                    <span class="val-hero mono" style="font-size: 1.8rem; color: var(--emerald);">$<span id="cushionAmt">0</span></span>
+                </div>
+            </section>
+
+            <!-- 5. EXECUTION TERMINAL -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Live Execution</h2>
+                    <i data-lucide="zap"></i>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="field"><label>Entry Price</label><input type="number" id="entry" value="18000" oninput="runMath()"></div>
+                    <div class="field"><label>Exit Price</label><input type="number" id="exit" value="18050" oninput="runMath()"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px;">
+                    <div class="field">
+                        <label>Contract Instrument</label>
+                        <select id="execType" onchange="runMath()">
+                            <option value="mini">Mini (Standard)</option>
+                            <option value="micro">Micro (1/10)</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Quantity</label><input type="number" id="execQty" value="1" min="1" step="1" oninput="runMath()"></div>
+                </div>
+                <div id="pnlDisplay" class="display-panel" style="margin-top:0">
+                    <span class="val-hero mono" style="font-size: 2rem;" id="resPnl">$1,000</span>
+                    <button class="btn-execute" onclick="logTrade()">Log Final Execution</button>
+                </div>
+            </section>
+        </main>
+
+        <section class="journal">
+            <header style="border:0; margin-bottom:0; padding:0; background:transparent;">
+                <div class="branding" style="font-size: 1rem; -webkit-text-fill-color: var(--text);"><i data-lucide="list"></i> Session History</div>
+                <button class="btn-ai" onclick="askAI('journal')">✨ AI Session Audit</button>
+            </header>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Instrument</th>
+                            <th>Contract</th>
+                            <th>Qty</th>
+                            <th>Points</th>
+                            <th>Net P/L</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="journalBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="aiOverlay">
+        <div class="ai-modal">
+            <i data-lucide="x" class="ai-close" onclick="closeAI()"></i>
+            <h3 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-weight: 800;">
+                <i data-lucide="sparkles"></i> AI INTELLIGENCE
+            </h3>
+            <div id="aiContent" class="ai-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; 
+        const instData = {
+            'NQ': { mini: 20, micro: 2, step: 0.25 },
+            'ES': { mini: 50, micro: 5, step: 0.25 },
+            'GC': { mini: 100, micro: 10, step: 0.1 },
+            'CL': { mini: 1000, micro: 100, step: 0.01 }
+        };
+
+        let currentTicker = 'NQ';
+        let trades = [];
+
+        async function askAI(type) {
+            const overlay = document.getElementById('aiOverlay');
+            const content = document.getElementById('aiContent');
+            overlay.style.display = 'flex';
+            content.innerText = "Processing live stream to Gemini...";
+
+            let prompt = "";
+            let system = "You are a professional prop firm risk auditor and futures mentor.";
+
+            if (type === 'planner') {
+                const dayMax = document.getElementById('maxProfitDay').innerText;
+                const goal = document.getElementById('goalAmt').innerText;
+                prompt = `Trader Goal: $${goal}. Consistency Limit: $${dayMax} per day. Suggest a specific trade frequency and contract sizing strategy (Minis vs Micros) to ensure compliance.`;
+            } else if (type === 'journal') {
+                prompt = `History: ${JSON.stringify(trades)}. Audit these trades for risk consistency, emotional behavior, and overtrading. Give a 3-sentence professional critique.`;
+            } else if (type === 'coach') {
+                const weight = document.getElementById('weightText').innerText;
+                prompt = `Trader's best day is currently ${weight} of their profit. Suggest a mindset shift to maintain discipline.`;
+                system = "You are an elite trading psychologist.";
+            }
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                contents: [{ parts: [{ text: prompt }] }],
+                                systemInstruction: { parts: [{ text: system }] }
+                            })
+                        });
+                        const data = await response.json();
+                        content.innerText = data.candidates?.[0]?.content?.parts?.[0]?.text || "System offline. Check API connectivity.";
+                        return;
+                    } catch (e) {
+                        await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                    }
+                }
+                content.innerText = "AI handshake failed. Verify Gemini API Key configuration.";
+            } catch (e) {
+                content.innerText = "Fatal error communicating with the neural engine.";
+            }
+        }
+
+        function closeAI() { document.getElementById('aiOverlay').style.display = 'none'; }
+
+        function setTicker(t) {
+            currentTicker = t;
+            document.querySelectorAll('.ticker-bar button').forEach(b => b.classList.remove('active'));
+            document.getElementById(t).classList.add('active');
+            
+            const defaults = { 'NQ': 18000, 'ES': 5100, 'GC': 2050, 'CL': 79.00 };
+            document.getElementById('entry').value = defaults[t];
+            document.getElementById('exit').value = defaults[t] + (instData[t].step * 20);
+            runMath();
+        }
+
+        function runMath() {
+            const inst = instData[currentTicker];
+            
+            // 1. Risk Architect
+            const bal = parseFloat(document.getElementById('balance').value) || 0;
+            const rp = parseFloat(document.getElementById('riskP').value) || 0;
+            const sl = parseFloat(document.getElementById('slPts').value) || 1;
+            const riskAmt = bal * (rp / 100);
+            document.getElementById('riskAmt').innerText = riskAmt.toLocaleString();
+            document.getElementById('resMini').innerText = Math.floor(riskAmt / (sl * inst.mini));
+            document.getElementById('resMicro').innerText = Math.floor(riskAmt / (sl * inst.micro));
+
+            // 2. Quick Consistency Check (UPDATED)
+            const qSize = parseFloat(document.getElementById('quickSize').value);
+            const qTargetPerc = parseFloat(document.getElementById('quickTargetPerc').value); // New target option
+            const qRule = parseFloat(document.getElementById('quickRule').value);
+            
+            const qTargetAmt = qSize * (qTargetPerc / 100); 
+            const qCap = qTargetAmt * (qRule / 100);
+            document.getElementById('quickCap').innerText = qCap.toLocaleString();
+
+            // 3. Payout Planner
+            const gp = parseFloat(document.getElementById('goalP').value) || 0;
+            const rule = parseFloat(document.getElementById('consRule').value) || 40;
+            const goalAmt = bal * (gp / 100);
+            const maxProfitDay = goalAmt * (rule / 100);
+            document.getElementById('goalAmt').innerText = goalAmt.toLocaleString();
+            document.getElementById('maxProfitDay').innerText = maxProfitDay.toLocaleString();
+
+            // 4. Consistency Audit
+            const totP = parseFloat(document.getElementById('totalP').value) || 0;
+            const maxD = parseFloat(document.getElementById('maxDay').value) || 0;
+            const weight = totP > 0 ? (maxD / totP) * 100 : 0;
+            const isBreach = weight > rule;
+            
+            document.getElementById('weightText').innerText = weight.toFixed(1) + '%';
+            document.getElementById('pBar').style.width = Math.min(weight, 100) + '%';
+            document.getElementById('pBar').style.background = isBreach ? 'var(--rose)' : 'var(--accent)';
+            document.getElementById('pBar').style.boxShadow = isBreach ? '0 0 15px var(--rose)' : '0 0 15px var(--accent)';
+            document.getElementById('auditStatus').innerText = isBreach ? 'BREACH' : 'CLEAN';
+            document.getElementById('auditStatus').style.color = isBreach ? 'var(--rose)' : 'var(--emerald)';
+            
+            const auditMsgElem = document.getElementById('auditMsg');
+            if (isBreach) {
+                const needed = (maxD / (rule / 100)) - totP;
+                auditMsgElem.innerText = `CRITICAL: Your outsized day requires an additional $${Math.ceil(needed).toLocaleString()} total profit to re-balance weight.`;
+                auditMsgElem.style.color = 'var(--rose)';
+            } else {
+                auditMsgElem.innerText = "SYSTEM: Behavior is compliant with institutional payout standards.";
+                auditMsgElem.style.color = 'var(--text-dim)';
+            }
+
+            // Drawdown Monitoring
+            const sessionLoss = trades.reduce((sum, t) => sum + (t.pnl < 0 ? t.pnl : 0), 0);
+            const sessionProfit = trades.reduce((sum, t) => sum + (t.pnl > 0 ? t.pnl : 0), 0);
+            const currentDD = Math.abs(Math.min(0, sessionProfit + sessionLoss));
+            const maxDD = 3000; 
+            const ddPerc = (currentDD / maxDD) * 100;
+            document.getElementById('ddPercent').innerText = ddPerc.toFixed(1) + '%';
+            document.getElementById('ddBar').style.width = Math.min(ddPerc, 100) + '%';
+            document.getElementById('cushionAmt').innerText = (maxDD - currentDD).toLocaleString();
+
+            // Execution PnL
+            const ent = parseFloat(document.getElementById('entry').value) || 0;
+            const exi = parseFloat(document.getElementById('exit').value) || 0;
+            const qty = Math.floor(document.getElementById('execQty').value) || 0;
+            const type = document.getElementById('execType').value;
+            const mult = inst[type];
+            const pnl = (exi - ent) * mult * qty;
+            
+            const display = document.getElementById('resPnl');
+            display.innerText = (pnl >= 0 ? '+' : '-') + '$' + Math.abs(pnl).toLocaleString();
+            display.style.color = pnl >= 0 ? 'var(--emerald)' : 'var(--rose)';
+
+            lucide.createIcons();
+        }
+
+        function logTrade() {
+            const ent = parseFloat(document.getElementById('entry').value);
+            const exi = parseFloat(document.getElementById('exit').value);
+            const qty = Math.floor(document.getElementById('execQty').value);
+            const type = document.getElementById('execType').value;
+            const pnl = (exi - ent) * instData[currentTicker][type] * qty;
+
+            trades.unshift({
+                id: Date.now(),
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                ticker: currentTicker,
+                type: type,
+                qty: qty,
+                delta: (exi - ent).toFixed(2),
+                pnl: pnl
+            });
+
+            const profitsOnly = trades.filter(t => t.pnl > 0).reduce((sum, t) => sum + t.pnl, 0);
+            const bestTrade = Math.max(...trades.map(t => t.pnl), 0);
+            document.getElementById('totalP').value = Math.max(profitsOnly, 0);
+            document.getElementById('maxDay').value = bestTrade;
+
+            renderJournal();
+            runMath();
+        }
+
+        function renderJournal() {
+            const body = document.getElementById('journalBody');
+            body.innerHTML = '';
+            trades.forEach(t => {
+                const row = `<tr>
+                    <td style="color: var(--text-dim)">${t.time}</td>
+                    <td style="font-weight:800">${t.ticker}</td>
+                    <td><span class="type-badge badge-${t.type}">${t.type}</span></td>
+                    <td class="mono" style="font-weight:700">${t.qty}</td>
+                    <td class="mono" style="color:${t.delta >= 0 ? 'var(--emerald)' : 'var(--rose)'}">${t.delta}</td>
+                    <td class="mono" style="font-weight:800; color:${t.pnl >= 0 ? 'var(--emerald)' : 'var(--rose)'}">
+                        ${t.pnl >= 0 ? '+' : '-'}$${Math.abs(t.pnl).toLocaleString()}
+                    </td>
+                    <td><i data-lucide="trash-2" size="14" style="cursor:pointer; color:var(--text-dim)" onclick="removeTrade(${t.id})"></i></td>
+                </tr>`;
+                body.innerHTML += row;
+            });
+            lucide.createIcons();
+        }
+
+        function removeTrade(id) {
+            trades = trades.filter(t => t.id !== id);
+            renderJournal();
+            runMath();
+        }
+
+        runMath();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
